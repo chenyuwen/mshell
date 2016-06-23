@@ -10,6 +10,7 @@ struct mshell {
 };
 
 struct cmd {
+	unsigned char *cmd[64];
 };
 
 #endif /*__MSHELL_H__*/

@@ -27,4 +27,4 @@ mstring.o: mstring.c
 
 .PHONY: clean
 clean:
-	rm -rf mshell *.o
+	rm -rf mshell *.o test

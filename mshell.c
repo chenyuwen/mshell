@@ -145,7 +145,7 @@ out:
 int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 {
 	int offset = 0;
-	unsigned char *out;
+	unsigned char *out, *tmp;
 	int i = 0;
 
 	//printf("line:%s\n", mshell->oneline);	
@@ -158,6 +158,11 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 		//if(out != NULL) {
 		//	free(out);
 		//}
+		if(out != NULL) {
+			tmp = out;
+			str_replace(&out, tmp, "~", mshell->user->pw_dir);
+			free(tmp);
+		} 
 		cmd->cmd[i++] = out;
 		
 	} while(out != NULL);

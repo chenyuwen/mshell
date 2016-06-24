@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mshell.h"
+#include "user.h"
 
 int mshell_init(struct mshell *mshell)
 {

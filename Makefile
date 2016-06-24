@@ -4,7 +4,7 @@ mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o user.o
 main.o: main.c mshell.h
 	gcc main.c -c -o main.o
 
-mshell.o: mshell.c mshell.h
+mshell.o: mshell.c mshell.h user.h
 	gcc mshell.c -c -o mshell.o
 
 internal_command.o: internal_command.c internal_command.h mshell.h

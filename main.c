@@ -17,7 +17,7 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 //	}
 
 	while(mshell.main_loop) {
-		printf("%s:%s%s", mshell.user->pw_name, mshell.cur_dir, 
+		printf("%s:%s%s ", mshell.user->pw_name, mshell.cur_dir, 
 			((mshell.user->pw_uid)?"$":"#"));
 		fflush(stdout);
 

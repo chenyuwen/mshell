@@ -17,7 +17,7 @@ struct mshell {
 };
 
 struct cmd {
-	unsigned char *cmd[64];
+	unsigned char *cmd[256];
 };
 
 #endif /*__MSHELL_H__*/

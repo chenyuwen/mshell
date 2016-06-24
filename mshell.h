@@ -5,7 +5,7 @@
 
 
 struct mshell {
-	unsigned char username[20];
+	unsigned char *username;
 	int is_root;
 	int main_loop;
 	unsigned char *oneline;

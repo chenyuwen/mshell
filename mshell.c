@@ -7,7 +7,7 @@
 int mshell_init(struct mshell *mshell)
 {
 	memset(mshell, 0, sizeof(struct mshell));
-	strcpy(mshell->username, "Even");
+	mshell->username = get_cur_username();
 	mshell->main_loop = 1;
 	return 0;
 }

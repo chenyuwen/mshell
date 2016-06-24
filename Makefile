@@ -1,5 +1,5 @@
-mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o
-	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o -o mshell
+mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o user.o
+	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o user.o -o mshell
 
 main.o: main.c mshell.h
 	gcc main.c -c -o main.o
@@ -15,6 +15,9 @@ cd_cmd.o: cd_cmd.c mshell.h
 
 exit_cmd.o: exit_cmd.c mshell.h
 	gcc exit_cmd.c -c -o exit_cmd.o
+
+user.o: user.c mshell.h
+	gcc user.c -c -o user.o
 
 .PHONY: clean
 clean:

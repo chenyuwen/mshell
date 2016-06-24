@@ -12,9 +12,9 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 	/*init mshell*/
 	mshell_init(&mshell);
 
-	while(envp[i] != NULL) {
-		printf("%s\n", envp[i++]);
-	}
+//	while(envp[i] != NULL) {
+//		printf("%s\n", envp[i++]);
+//	}
 
 	while(mshell.main_loop) {
 		/*TODO: output shell tag.*/

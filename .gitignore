@@ -16,3 +16,4 @@ enyuwen@chenyuwen-Precision-T1700:~/aosp/kernel$ cat .gitignore
 # Top-level generic files
 #
 /mshell
+/test

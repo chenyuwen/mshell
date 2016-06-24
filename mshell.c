@@ -68,13 +68,14 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 	int has_quotation_mark = 0;
 	int last_is_escape = 0;
 	int offset = *oneline_offset;
-
+	int skip_offset = 0;
 	int out_offset = 0, out_len = 0;
 
 	/*filter space*/
 	while(oneline[offset] == ' ' || oneline[offset] == '\n' || oneline[offset] == ';')
 		offset++;
 
+	skip_offset = offset;
 	if(oneline[offset] == '\"' || oneline[offset] == '\'') {
 		has_quotation_mark = 1;
 		offset++;
@@ -130,7 +131,7 @@ out:
 		return -1;
 	}
 
-	if(*oneline_offset == offset) {
+	if(skip_offset == offset) {
 		free(block);
 		block = NULL;
 	} else {
@@ -164,7 +165,6 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 			free(tmp);
 		} 
 		cmd->cmd[i++] = out;
-		
 	} while(out != NULL);
 
 	/*TODO: parser arg*/

@@ -160,7 +160,7 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 	return 0;
 }
 
-int mshell_handle_cmd(struct mshell *mshell, const struct cmd *cmd)
+int mshell_handle_external_cmd(struct mshell *mshell, const struct cmd *cmd)
 {
 	int ret = 0;
 	int pid = 0;
@@ -169,7 +169,7 @@ int mshell_handle_cmd(struct mshell *mshell, const struct cmd *cmd)
 		pid = fork();
 
 		if(pid == 0) {
-			ret = execlp(cmd->cmd[0], cmd->cmd[0], NULL);
+			ret = execlp(cmd->cmd[0], cmd->cmd[0], cmd->cmd[1], NULL);
 			if(ret < 0) {
 				perror("mshell");
 			}

@@ -169,7 +169,7 @@ int mshell_handle_external_cmd(struct mshell *mshell, const struct cmd *cmd)
 		pid = fork();
 
 		if(pid == 0) {
-			ret = execlp(cmd->cmd[0], cmd->cmd[0], cmd->cmd[1], NULL);
+			ret = execvp(cmd->cmd[0], (void *)cmd->cmd);
 			if(ret < 0) {
 				perror("mshell");
 			}

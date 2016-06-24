@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
 #include "mshell.h"
 #include "mstring.h"
 
@@ -19,6 +20,7 @@ int cd_command(struct mshell *mshell, struct cmd *cmd)
 	if(ret < 0) {
 		perror("mshell");
 	}
+	getcwd(mshell->cur_dir, PATH_MAX);
 	return ret;
 }
 

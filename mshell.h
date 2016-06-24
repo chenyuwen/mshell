@@ -1,5 +1,7 @@
 #ifndef __MSHELL_H__
 #define __MSHELL_H__
+#include <sys/types.h>
+#include <dirent.h>
 #include <pwd.h>
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
@@ -8,6 +10,7 @@ struct mshell {
 	struct passwd *user;
 	int main_loop;
 	unsigned char *oneline;
+	unsigned char cur_dir[PATH_MAX];
 	struct env {
 		struct env *next;
 		unsigned char *name;

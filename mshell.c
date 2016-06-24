@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include <pwd.h>
 #include "mshell.h"
 #include "user.h"
@@ -11,6 +12,7 @@ int mshell_init(struct mshell *mshell)
 	memset(mshell, 0, sizeof(struct mshell));
 	mshell->user = getpwuid(getuid());
 	mshell->main_loop = 1;
+	getcwd(mshell->cur_dir, PATH_MAX);
 	return 0;
 }
 

@@ -3,16 +3,14 @@
 #include <unistd.h>
 #include <pwd.h>
 
-const char *get_cur_username(void)
+const struct passwd *get_user_passwd(void)
 {
-	uid_t uid;
 	struct passwd *passwd;
 
-	uid = getuid();
-	passwd = getpwuid(uid);
-	if (NULL == passwd) {
+	passwd = getpwuid(getuid());
+	if(NULL == passwd) {
 		perror("mshell");
 	}
-	return passwd->pw_name;
+	return passwd;
 }
 

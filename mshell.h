@@ -1,12 +1,11 @@
 #ifndef __MSHELL_H__
 #define __MSHELL_H__
+#include <pwd.h>
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-
 struct mshell {
-	const unsigned char *username;
-	int is_root;
+	struct passwd *user;
 	int main_loop;
 	unsigned char *oneline;
 	struct env {

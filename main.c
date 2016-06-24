@@ -17,7 +17,7 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 //	}
 
 	while(mshell.main_loop) {
-		printf("%s%s:", mshell.username, (mshell.is_root?"#":"$"));
+		printf("%s%s:", mshell.user->pw_name, ((mshell.user->pw_uid)?"$":"#"));
 		fflush(stdout);
 
 		mshell_read_oneline(&mshell);

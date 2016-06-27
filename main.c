@@ -25,6 +25,10 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 
 		mshell_parser_oneline(&mshell, &command);
 
+		if(cmd_is_null(&mshell, &command)) {
+			continue;
+		}
+
 		if(mshell_is_internal_command(&mshell, &command)) {
 			mshell_handle_internal_cmd(&mshell, &command);
 		} else {

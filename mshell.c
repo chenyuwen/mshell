@@ -173,6 +173,14 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 	return 0;
 }
 
+int cmd_is_null(struct mshell *mshell, const struct cmd *cmd)
+{
+	if(cmd->cmd[0] == NULL) {
+		return 1;
+	}
+	return 0;
+}
+
 int mshell_handle_external_cmd(struct mshell *mshell, const struct cmd *cmd)
 {
 	int ret = 0;

@@ -7,6 +7,7 @@
 int cd_command(struct mshell *, struct cmd *);
 int exit_command(struct mshell *, struct cmd *);
 int ll_command(struct mshell *, struct cmd *);
+int l_command(struct mshell *, struct cmd *);
 
 static const struct internal_command internal_command[] = {
 	[0] = {
@@ -20,6 +21,10 @@ static const struct internal_command internal_command[] = {
 	[2] = {
 		.name = "ll",
 		.cmd = ll_command,
+	},
+	[3] = {
+		.name = "l",
+		.cmd = l_command,
 	},
 };
 

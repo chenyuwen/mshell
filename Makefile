@@ -1,5 +1,5 @@
-mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o user.o mstring.o
-	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o user.o mstring.o -o mshell
+mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o
+	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o -o mshell
 
 test: test.o mstring.o
 	gcc test.o mstring.o -o test
@@ -21,6 +21,9 @@ exit_cmd.o: exit_cmd.c mshell.h
 
 ll_cmd.o: ll_cmd.c mshell.h
 	gcc ll_cmd.c -c -o ll_cmd.o
+
+l_cmd.o: l_cmd.c mshell.h
+	gcc l_cmd.c -c -o l_cmd.o
 
 user.o: user.c mshell.h
 	gcc user.c -c -o user.o

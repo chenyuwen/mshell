@@ -4,15 +4,29 @@
 #include <string.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <fcntl.h>
 #include "mshell.h"
 #include "user.h"
 
-int mshell_init(struct mshell *mshell)
+int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 {
 	memset(mshell, 0, sizeof(struct mshell));
 	mshell->user = getpwuid(getuid());
 	mshell->main_loop = 1;
+	mshell->is_show_cmdline = 1;
 	getcwd(mshell->cur_dir, PATH_MAX);
+	mshell->fd = 0;
+
+	/*需要执行脚本*/
+	if(argc >= 2) {
+		mshell->fd = open(argv[1], O_RDONLY);
+		if(mshell->fd < 0) {
+			mshell->main_loop = 0;
+			perror("open");
+			return 0;
+		}
+		mshell->is_show_cmdline = 0;
+	}
 	return 0;
 }
 
@@ -34,10 +48,13 @@ int mshell_read_oneline(struct mshell *mshell)
 	}
 
 	while(1) {
-		ret = read(0, &oneline[offset], 1);
+		ret = read(mshell->fd, &oneline[offset], 1);
 		if(ret < 0) {
 			perror("read");
 			return -1;
+		} else if(!ret) {
+			mshell->main_loop = 0;
+			return 0;
 		}
 
 		if(oneline[offset] == '\n') {
@@ -192,14 +209,14 @@ int mshell_handle_external_cmd(struct mshell *mshell, const struct cmd *cmd)
 		if(pid == 0) {
 			ret = execvp(cmd->cmd[0], (void *)cmd->cmd);
 			if(ret < 0) {
-				perror("mshell");
+				perror(cmd->cmd[0]);
 			}
 
 			exit(ret);
 		} else if(pid > 0) {
 			wait(&ret);
 		} else {
-			perror("mshell");
+			perror("fork");
 		}
 	}
 

@@ -10,16 +10,23 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 	int i = 0;
 
 	/*init mshell*/
-	mshell_init(&mshell);
+	mshell_init(&mshell, argc, argv, envp);
+	
+//	for(i=0; i<argc; i++) {
+//		printf("argv[%d] = %s\n", i, argv[i]);
+//	}
 
 //	while(envp[i] != NULL) {
 //		printf("%s\n", envp[i++]);
 //	}
 
 	while(mshell.main_loop) {
-		printf("%s:%s%s ", mshell.user->pw_name, mshell.cur_dir, 
-			((mshell.user->pw_uid)?"$":"#"));
-		fflush(stdout);
+		
+		if(mshell.is_show_cmdline) {
+			printf("%s:%s%s ", mshell.user->pw_name, mshell.cur_dir, 
+				((mshell.user->pw_uid)?"$":"#"));
+			fflush(stdout);
+		}
 
 		mshell_read_oneline(&mshell);
 

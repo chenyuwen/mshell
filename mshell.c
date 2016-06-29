@@ -168,8 +168,16 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 	unsigned char *out, *tmp;
 	int i = 0;
 
-	//printf("line:%s\n", mshell->oneline);	
-	/*TODO: parser command*/
+	for(i=0; i<ARRAY_SIZE(cmd->cmd); i++) {
+		if(cmd->cmd[i] != NULL) {
+			free(cmd->cmd[i]);
+			cmd->cmd[i] = NULL;
+		} else {
+			break;
+		}
+	}
+
+	/*parser command*/
 	do {
 		parser_one_block(mshell->oneline, &offset, &out);
 		//printf("out: offset = %d, %s\n", offset, out);

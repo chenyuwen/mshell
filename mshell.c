@@ -173,6 +173,7 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 			free(cmd->cmd[i]);
 			cmd->cmd[i] = NULL;
 		} else {
+			i = 0;
 			break;
 		}
 	}

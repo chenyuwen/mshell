@@ -27,6 +27,8 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 		}
 		mshell->is_show_cmdline = 0;
 	}
+
+	signal_init();
 	return 0;
 }
 

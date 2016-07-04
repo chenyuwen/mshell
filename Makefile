@@ -1,5 +1,5 @@
-mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o
-	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o -o mshell
+mshell: main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o signal.o
+	gcc main.o mshell.o internal_command.o cd_cmd.o exit_cmd.o ll_cmd.o l_cmd.o user.o mstring.o signal.o -o mshell
 
 test: test.o mstring.o
 	gcc test.o mstring.o -o test
@@ -30,6 +30,9 @@ user.o: user.c mshell.h
 
 mstring.o: mstring.c
 	gcc mstring.c -c -o mstring.o
+
+signal.o: signal.c
+	gcc signal.c -c -o signal.o
 
 .PHONY: clean
 clean:

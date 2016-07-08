@@ -102,6 +102,15 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 		offset++;
 	}
 
+	if(oneline[offset] == ';' || oneline[offset] == '|' ||
+			oneline[offset] == '#') {
+		block = (void *)malloc(2);
+		block[0] = oneline[offset++];
+		block[1] = '\0';
+		out_offset++;
+		goto out;
+	}
+
 	while(oneline[offset] != '\0') {
 		if(out_offset >= (out_len - 1)) {
 			out_len += 20;
@@ -135,6 +144,9 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 				continue;
 			case ' ':
 			case '\n':
+			case ';':
+			case '|':
+			case '#':
 				if(!has_quotation_mark) {
 					goto out;
 				}
@@ -194,8 +206,10 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 			tmp = out;
 			str_replace(&out, tmp, "~", mshell->user->pw_dir);
 			free(tmp);
-		} 
+			//printf("%s\n", out);
+		}
 		cmd->cmd[i++] = out;
+		cmd->max = i;
 	} while(out != NULL);
 
 	/*TODO: parser arg*/
@@ -220,10 +234,12 @@ int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 	if(cmd->cmd[offset] != NULL) {
 		/*TODO:准备参数, offset指向下一个*/
 		for(i=offset; cmd->cmd[i] != NULL; i++) {
-			if(cmd->cmd[i][0] == ';' || cmd->cmd[i][0] == '|') {
+			if(cmd->cmd[i][0] == ';' || cmd->cmd[i][0] == '|' ||
+					cmd->cmd[i][0] == '#') {
 				break;
 			}
 		}
+
 		tmp = cmd->cmd[i];
 		cmd->cmd[i] = NULL;
 
@@ -239,7 +255,12 @@ int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 		} else if(pid > 0) {
 			wait(&ret);
 			cmd->cmd[i] = tmp;
-			cmd->offset = i + 1;
+
+			if(tmp != NULL && tmp[0] == '#') {
+				cmd->offset = cmd->max;
+			} else {
+				cmd->offset = i + 1;
+			}
 		} else {
 			perror("fork");
 		}

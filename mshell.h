@@ -23,6 +23,7 @@ struct mshell {
 struct cmd {
 	unsigned char *cmd[256];
 	int offset;
+	int max;
 };
 
 #endif /*__MSHELL_H__*/

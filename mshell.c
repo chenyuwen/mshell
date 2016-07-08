@@ -105,7 +105,7 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 	}
 
 	if(oneline[offset] == ';' || oneline[offset] == '|' ||
-			oneline[offset] == '#') {
+			oneline[offset] == '#' || oneline[offset] == '&') {
 		block = (void *)malloc(2);
 		block[0] = oneline[offset++];
 		block[1] = '\0';
@@ -148,6 +148,7 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 			case '\n':
 			case ';':
 			case '|':
+			case '&':
 			case '#':
 				if(!has_quotation_mark) {
 					goto out;
@@ -237,7 +238,7 @@ int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 		/*TODO:准备参数, offset指向下一个*/
 		for(i=offset; cmd->cmd[i] != NULL; i++) {
 			if(cmd->cmd[i][0] == ';' || cmd->cmd[i][0] == '|' ||
-					cmd->cmd[i][0] == '#') {
+					cmd->cmd[i][0] == '#' || cmd->cmd[i][0] == '&') {
 				break;
 			}
 		}

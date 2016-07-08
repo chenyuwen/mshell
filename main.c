@@ -32,16 +32,14 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 
 		mshell_parser_oneline(&mshell, &command);
 
-		if(cmd_is_null(&mshell, &command)) {
-			continue;
+		while(!cmd_is_null(&mshell, &command)) {
+		
+			if(mshell_is_internal_command(&mshell, &command)) {
+				mshell_handle_internal_cmd(&mshell, &command);
+			} else {
+				mshell_handle_external_cmd(&mshell, &command);
+			}
 		}
-
-		if(mshell_is_internal_command(&mshell, &command)) {
-			mshell_handle_internal_cmd(&mshell, &command);
-		} else {
-			mshell_handle_external_cmd(&mshell, &command);
-		}
-		//mshell_free_command
 	}
 	
 	return 0;

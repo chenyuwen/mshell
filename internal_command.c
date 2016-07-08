@@ -33,7 +33,7 @@ int mshell_is_internal_command(struct mshell *mshell, struct cmd *cmd)
 {
 	int i = 0;
 	for(i = 0; i<ARRAY_SIZE(internal_command); i++) {
-		if(!strcmp(internal_command[i].name, cmd->cmd[0])) {
+		if(!strcmp(internal_command[i].name, cmd->cmd[cmd->offset])) {
 			return 1;
 		}
 	}
@@ -45,7 +45,7 @@ int mshell_handle_internal_cmd(struct mshell *mshell, struct cmd *cmd)
 	int i = 0;
 	int ret = -1;
 	for(i=0; i<ARRAY_SIZE(internal_command); i++) {
-		if(!strcmp(internal_command[i].name, cmd->cmd[0])) {
+		if(!strcmp(internal_command[i].name, cmd->cmd[cmd->offset])) {
 			internal_command[i].cmd(mshell, cmd);
 			ret = 0;
 		}

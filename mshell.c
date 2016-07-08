@@ -93,7 +93,7 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 	int out_offset = 0, out_len = 0;
 
 	/*filter space*/
-	while(oneline[offset] == ' ' || oneline[offset] == '\n' || oneline[offset] == ';')
+	while(oneline[offset] == ' ' || oneline[offset] == '\n')
 		offset++;
 
 	skip_offset = offset;
@@ -135,7 +135,6 @@ int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char 
 				continue;
 			case ' ':
 			case '\n':
-			case ';':
 				if(!has_quotation_mark) {
 					goto out;
 				}
@@ -180,6 +179,8 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 		}
 	}
 
+	cmd->offset = 0; /*init offset*/
+
 	/*parser command*/
 	do {
 		parser_one_block(mshell->oneline, &offset, &out);
@@ -203,29 +204,42 @@ int mshell_parser_oneline(const struct mshell *mshell, struct cmd *cmd)
 
 int cmd_is_null(struct mshell *mshell, const struct cmd *cmd)
 {
-	if(cmd->cmd[0] == NULL) {
+	if(cmd->cmd[cmd->offset] == NULL) {
 		return 1;
 	}
 	return 0;
 }
 
-int mshell_handle_external_cmd(struct mshell *mshell, const struct cmd *cmd)
+int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 {
 	int ret = 0;
 	int pid = 0;
-	if(cmd->cmd[0] != NULL) {
+	int offset = cmd->offset, i;
+	unsigned char *tmp;
+
+	if(cmd->cmd[offset] != NULL) {
+		/*TODO:准备参数, offset指向下一个*/
+		for(i=offset; cmd->cmd[i] != NULL; i++) {
+			if(cmd->cmd[i][0] == ';' || cmd->cmd[i][0] == '|') {
+				break;
+			}
+		}
+		tmp = cmd->cmd[i];
+		cmd->cmd[i] = NULL;
 
 		pid = fork();
 
 		if(pid == 0) {
-			ret = execvp(cmd->cmd[0], (void *)cmd->cmd);
+			ret = execvp(cmd->cmd[offset], (void *)&cmd->cmd[cmd->offset]);
 			if(ret < 0) {
-				perror(cmd->cmd[0]);
+				perror(cmd->cmd[offset]);
 			}
 
 			exit(ret);
 		} else if(pid > 0) {
 			wait(&ret);
+			cmd->cmd[i] = tmp;
+			cmd->offset = i + 1;
 		} else {
 			perror("fork");
 		}

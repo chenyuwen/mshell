@@ -56,7 +56,8 @@ int mshell_read_oneline(struct mshell *mshell)
 			return -1;
 		} else if(!ret) {
 			mshell->main_loop = 0;
-			return 0;
+			oneline[offset] = '\0';
+			goto exit;
 		}
 
 		if(oneline[offset] == '\n') {
@@ -79,6 +80,7 @@ int mshell_read_oneline(struct mshell *mshell)
 		}
 	}
 
+exit:
 	mshell->oneline = oneline;
 	return 0;
 }

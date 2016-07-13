@@ -42,14 +42,38 @@ int mshell_is_internal_command(struct mshell *mshell, struct cmd *cmd)
 
 int mshell_handle_internal_cmd(struct mshell *mshell, struct cmd *cmd)
 {
-	int i = 0;
+	int i = 0, offset = 0;
 	int ret = -1;
+	char *tmp = NULL;
+
+	for(i=cmd->offset; cmd->cmd[i] != NULL; i++) {
+		switch(cmd->cmd[i][0]) {
+			case ';':
+			case '#':
+			case '$':
+			case '|':
+				goto out;
+		}
+	}
+
+out:
+	tmp = cmd->cmd[i];
+	cmd->cmd[i] = NULL;
+	offset = i;
+
 	for(i=0; i<ARRAY_SIZE(internal_command); i++) {
 		if(!strcmp(internal_command[i].name, cmd->cmd[cmd->offset])) {
 			internal_command[i].cmd(mshell, cmd);
 			ret = 0;
 		}
 	}
+
+	if(tmp != NULL && tmp[0] == '#') {
+		cmd->offset = cmd->max;
+	} else {
+		cmd->offset = offset + 1;
+	}
+
 	return ret;
 }
 

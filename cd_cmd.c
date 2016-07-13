@@ -10,15 +10,19 @@ int cd_command(struct mshell *mshell, struct cmd *cmd)
 	unsigned char *path;
 	int ret = 0;
 
-	if(cmd->cmd[1] == NULL) {
+	if(mshell->pipe >= 0) {
+		return -1;
+	}
+
+	if(cmd->cmd[cmd->offset + 1] == NULL) {
 		path = mshell->user->pw_dir;
 	} else {
-		path = cmd->cmd[1];
+		path = cmd->cmd[cmd->offset + 1];
 	}
 
 	ret = chdir(path);
 	if(ret < 0) {
-		perror("mshell");
+		perror("cd");
 	}
 	getcwd(mshell->cur_dir, PATH_MAX);
 	return ret;

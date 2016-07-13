@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "mshell.h"
 
@@ -8,6 +9,7 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 	struct mshell mshell;
 	struct cmd command;
 	int i = 0;
+	int len = 0;
 
 	/*init mshell*/
 	mshell_init(&mshell, argc, argv, envp);
@@ -23,8 +25,15 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 	while(mshell.main_loop) {
 		
 		if(mshell.is_show_cmdline) {
-			printf("%s:%s%s ", mshell.user->pw_name, mshell.cur_dir, 
-				((mshell.user->pw_uid)?"$":"#"));
+			len = strlen(mshell.user->pw_dir);
+			if((!strncmp(mshell.cur_dir, mshell.user->pw_dir, len)) &&
+				(mshell.cur_dir[len] == '/' || mshell.cur_dir[len] == '\0')) {
+				printf("%s:~%s%s ", mshell.user->pw_name, mshell.cur_dir + len,
+					((mshell.user->pw_uid)?"$":"#"));
+			} else {
+				printf("%s:%s%s ", mshell.user->pw_name, mshell.cur_dir, 
+					((mshell.user->pw_uid)?"$":"#"));
+			}
 			fflush(stdout);
 		}
 

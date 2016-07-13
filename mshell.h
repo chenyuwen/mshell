@@ -12,6 +12,8 @@ struct mshell {
 	unsigned char *oneline;
 	unsigned char cur_dir[PATH_MAX];
 	int fd;
+	int pipe;
+	int wait_for_childs;
 	int is_show_cmdline;
 	struct env {
 		struct env *next;

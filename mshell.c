@@ -16,6 +16,8 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 	mshell->is_show_cmdline = 1;
 	getcwd(mshell->cur_dir, PATH_MAX);
 	mshell->fd = 0;
+	mshell->pipe = -1;
+	mshell->wait_for_childs = 0;
 
 	/*需要执行脚本*/
 	if(argc >= 2) {
@@ -233,22 +235,43 @@ int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 	int pid = 0;
 	int offset = cmd->offset, i;
 	unsigned char *tmp;
+	int pipefd[2] = {-1, -1};
 
 	if(cmd->cmd[offset] != NULL) {
 		/*TODO:准备参数, offset指向下一个*/
 		for(i=offset; cmd->cmd[i] != NULL; i++) {
-			if(cmd->cmd[i][0] == ';' || cmd->cmd[i][0] == '|' ||
-					cmd->cmd[i][0] == '#' || cmd->cmd[i][0] == '&') {
-				break;
+			switch(cmd->cmd[i][0]) {
+				case ';':
+				case '#':
+				case '$':
+					goto out;
+				case '|':
+					ret = pipe(pipefd);
+					if(ret < 0) {
+						perror("pipe");
+						return -1;
+					}
+					goto out;
 			}
 		}
 
+out:
 		tmp = cmd->cmd[i];
 		cmd->cmd[i] = NULL;
-
 		pid = fork();
 
 		if(pid == 0) {
+			if(mshell->pipe != -1) {
+				close(0); //close input
+				dup2(mshell->pipe, 0);
+			}
+
+			if(pipefd[1] >= 0) {
+				close(pipefd[0]);
+				close(1); // close output
+				dup2(pipefd[1], 1); // ouput > pipe out
+			}
+
 			ret = execvp(cmd->cmd[offset], (void *)&cmd->cmd[cmd->offset]);
 			if(ret < 0) {
 				perror(cmd->cmd[offset]);
@@ -256,8 +279,21 @@ int mshell_handle_external_cmd(struct mshell *mshell, struct cmd *cmd)
 
 			exit(ret);
 		} else if(pid > 0) {
-			wait(&ret);
+			if(tmp == NULL || (tmp != NULL && tmp[0] != '|')) {
+				mshell->wait_for_childs++;
+				while(mshell->wait_for_childs) {
+					wait(&ret);
+					mshell->wait_for_childs--;
+				}
+			} else {
+				mshell->wait_for_childs++;
+			}
+			//wait(&ret);
 			cmd->cmd[i] = tmp;
+			mshell->pipe = pipefd[0];
+			if(pipefd[1] >= 0) {
+				close(pipefd[1]);
+			}
 
 			if(tmp != NULL && tmp[0] == '#') {
 				cmd->offset = cmd->max;

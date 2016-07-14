@@ -40,3 +40,6 @@ mshell_env.o: mshell_env.c mshell_env.h mshell.h mstring.h
 .PHONY: clean
 clean:
 	rm -rf mshell *.o test
+
+line:
+	wc *.c *.h *.sh

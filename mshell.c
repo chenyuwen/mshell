@@ -31,6 +31,7 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 	}
 
 	signal_init();
+	load_env(mshell, env);
 	return 0;
 }
 

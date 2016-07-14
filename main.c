@@ -41,6 +41,11 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 
 		mshell_parser_oneline(&mshell, &command);
 
+		cmd_prepare_env(&mshell, &command);
+		for(i=0; command.cmd[i]!= NULL; i++) {
+			printf("env:%s\n", command.cmd[i]);
+		}
+
 		while(!cmd_is_null(&mshell, &command)) {
 		
 			if(mshell_is_internal_command(&mshell, &command)) {
@@ -48,6 +53,7 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 			} else {
 				mshell_handle_external_cmd(&mshell, &command);
 			}
+			printf("hanlle\n");
 		}
 	}
 	

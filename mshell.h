@@ -4,6 +4,8 @@
 #include <dirent.h>
 #include <pwd.h>
 
+#include "mshell_env.h"
+
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 struct mshell {
@@ -15,11 +17,8 @@ struct mshell {
 	int pipe;
 	int wait_for_childs;
 	int is_show_cmdline;
-	struct env {
-		struct env *next;
-		unsigned char *name;
-		unsigned char *message;
-	} *env;
+
+	struct mshell_env env;
 };
 
 struct cmd {

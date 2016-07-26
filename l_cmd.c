@@ -3,13 +3,15 @@
 #include <stdlib.h>
 #include "mshell.h"
 
-static const struct cmd l_cmd = {
-	"ls",
+static struct cmd l_cmd = {
+	"ls", "--color=auto", NULL
 };
 
 int l_command(struct mshell *mshell, struct cmd *cmd)
 {
+	printf("herre\n");
 	mshell_handle_external_cmd(mshell, &l_cmd);
+	printf("out\n");
 	return 0;
 }
 

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include "mshell.h"
 
-static const struct cmd ll_cmd = {
-	"ls", "-l",
+static struct cmd ll_cmd = {
+	"ls", "-l", "--color=auto", NULL,
 };
 
 int ll_command(struct mshell *mshell, struct cmd *cmd)

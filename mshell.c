@@ -4,10 +4,12 @@
 #include <string.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <termios.h>
 #include <fcntl.h>
 #include "mshell.h"
 #include "user.h"
 
+#define MOVELEFT() do{printf("\033[D");}while(0)
 int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 {
 	memset(mshell, 0, sizeof(struct mshell));
@@ -35,12 +37,42 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 	return 0;
 }
 
+int escape_up_down(int offset, int *cur_offset)
+{
+	char keycode[4];
+
+	keycode[0] = '\033';
+	keycode[1] = getchar();
+	keycode[2] = getchar();
+	keycode[3] ='\0';
+
+	if(!strncmp(keycode, "\033[D", 3)) {
+		if(*cur_offset > 0) {
+			printf("%s", keycode);
+			//printf("%d", *cur_offset);
+			(*cur_offset)--;
+			//printf("LEFT %d %d", *cur_offset, offset);
+		}
+	} else if(!strncmp(keycode, "\033[C", 3)) {
+		if(*cur_offset < offset) {
+			printf("%s", keycode);
+			(*cur_offset)++;
+			//printf("RIGHT %d %d", *cur_offset, offset);
+		}
+	}
+	return 0;
+}
+
 int mshell_read_oneline(struct mshell *mshell)
 {
 	unsigned char *oneline;
+	char chr;
 	int offset = 0;
 	int oneline_len = 20;
 	int ret = 0;
+	int cur_offset = 0;
+	int i = 0;
+	struct termios old, new;
 
 	if(mshell->oneline) {
 		free(mshell->oneline);
@@ -52,24 +84,65 @@ int mshell_read_oneline(struct mshell *mshell)
 		return -1;
 	}
 
+	tcgetattr(STDIN_FILENO, &old);
+	new = old;
+	new.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &new);
+
 	while(1) {
-		ret = read(mshell->fd, &oneline[offset], 1);
+		//ret = read(mshell->fd, &oneline[offset], 1);
+		chr = getchar();
 		if(ret < 0) {
 			perror("read");
+			tcsetattr(STDIN_FILENO, TCSANOW, &old);
 			return -1;
 		} else if(!ret) {
-			mshell->main_loop = 0;
-			oneline[offset] = '\0';
-			goto exit;
+			//mshell->main_loop = 0;
+			//oneline[offset] = '\0';
+			//goto exit;
 		}
 
-		if(oneline[offset] == '\n') {
-			oneline[offset] = '\0';
-			break;
-		}
+		switch(chr) {
+			case '\n':
+			case '\0':
+				putchar('\n');
+				goto exit;
+				break;
+			case '\t':
+				continue;
+			case 127: /*DEL*/
+				if(cur_offset > 0) {
+					MOVELEFT();
+					oneline[offset] = '\0';
+					printf("%s ", &oneline[cur_offset]);
+					for(i=cur_offset-1; i<offset; i++) {
+						MOVELEFT();
+					}
+					for(i=cur_offset; i<offset; i++) {
+						oneline[i - 1] = oneline[i];
+					}
+					oneline[offset - 1] = '\0';
+					//printf("\n%s\n", oneline);
+					cur_offset--;
+					offset--;
+				}
+				continue;
+			case '\033':
+				//printf("cur %d", cur_offset);
+				escape_up_down(offset, &cur_offset);
+				continue;
+			default:
+				//printf("%d\n", oneline[offset]);
+				oneline[offset + 1] = '\0';
+				for(i=cur_offset; i<offset; i++) oneline[i + 1] = oneline[i];
+				oneline[cur_offset] = chr;
+				oneline[offset + 2] = '\0';
+				printf("%s", &oneline[cur_offset]);
+				for(i=cur_offset; i<offset; i++) MOVELEFT();
+				//oneline[offset] = chr;
+				cur_offset++;
+				break;
 
-		if(oneline[offset] == '\t') {
-			printf("/b");
 		}
 
 		offset++;
@@ -77,6 +150,7 @@ int mshell_read_oneline(struct mshell *mshell)
 			oneline = (void *)realloc(oneline, oneline_len + 20);
 			if(oneline == NULL) {
 				perror("realloc");
+				tcsetattr(STDIN_FILENO, TCSANOW, &old);
 				return -1;
 			}
 			oneline_len += 20;
@@ -84,6 +158,7 @@ int mshell_read_oneline(struct mshell *mshell)
 	}
 
 exit:
+	tcsetattr(STDIN_FILENO, TCSANOW, &old);
 	mshell->oneline = oneline;
 	return 0;
 }

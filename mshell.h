@@ -17,6 +17,7 @@ struct mshell {
 	int pipe;
 	int wait_for_childs;
 	int is_show_cmdline;
+	int (*read_oneline)(struct mshell *);
 
 	struct mshell_env env;
 };

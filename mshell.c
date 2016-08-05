@@ -10,6 +10,10 @@
 #include "user.h"
 
 #define MOVELEFT() do{printf("\033[D");}while(0)
+
+int mshell_read_oneline(struct mshell *mshell);
+int mshell_read_oneline_from_file(struct mshell *mshell);
+
 int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 {
 	memset(mshell, 0, sizeof(struct mshell));
@@ -21,6 +25,7 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 	mshell->pipe = -1;
 	mshell->wait_for_childs = 0;
 
+	mshell->read_oneline = mshell_read_oneline;
 	/*需要执行脚本*/
 	if(argc >= 2) {
 		mshell->fd = open(argv[1], O_RDONLY);
@@ -30,6 +35,7 @@ int mshell_init(struct mshell *mshell, int argc, char **argv, char **env)
 			return 0;
 		}
 		mshell->is_show_cmdline = 0;
+		mshell->read_oneline = mshell_read_oneline_from_file;
 	}
 
 	signal_init();
@@ -90,17 +96,7 @@ int mshell_read_oneline(struct mshell *mshell)
 	tcsetattr(STDIN_FILENO, TCSANOW, &new);
 
 	while(1) {
-		//ret = read(mshell->fd, &oneline[offset], 1);
 		chr = getchar();
-		if(ret < 0) {
-			perror("read");
-			tcsetattr(STDIN_FILENO, TCSANOW, &old);
-			return -1;
-		} else if(!ret) {
-			//mshell->main_loop = 0;
-			//oneline[offset] = '\0';
-			//goto exit;
-		}
 
 		switch(chr) {
 			case '\n':
@@ -115,14 +111,12 @@ int mshell_read_oneline(struct mshell *mshell)
 					MOVELEFT();
 					oneline[offset] = '\0';
 					printf("%s ", &oneline[cur_offset]);
-					for(i=cur_offset-1; i<offset; i++) {
-						MOVELEFT();
-					}
 					for(i=cur_offset; i<offset; i++) {
+						MOVELEFT();
 						oneline[i - 1] = oneline[i];
 					}
+					MOVELEFT();
 					oneline[offset - 1] = '\0';
-					//printf("\n%s\n", oneline);
 					cur_offset--;
 					offset--;
 				}
@@ -162,6 +156,60 @@ exit:
 	mshell->oneline = oneline;
 	return 0;
 }
+
+int mshell_read_oneline_from_file(struct mshell *mshell)
+{
+	unsigned char *oneline;
+	int offset = 0;
+	int oneline_len = 20;
+	int ret = 0;
+
+	if(mshell->oneline) {
+		free(mshell->oneline);
+	}
+
+	oneline = (void *)malloc(oneline_len);
+	if(!oneline) {
+		perror("malloc");
+		return -1;
+	}
+
+	while(1) {
+		ret = read(mshell->fd, &oneline[offset], 1);
+		if(ret < 0) {
+			perror("read");
+			return -1;
+		} else if(!ret) {
+			mshell->main_loop = 0;
+			oneline[offset] = '\0';
+			goto exit;
+		}
+
+		if(oneline[offset] == '\n') {
+			oneline[offset] = '\0';
+			break;
+		}
+
+		if(oneline[offset] == '\t') {
+			printf("/b");
+		}
+
+		offset++;
+		if(offset >= (oneline_len - 1)) {
+			oneline = (void *)realloc(oneline, oneline_len + 20);
+			if(oneline == NULL) {
+				perror("realloc");
+				return -1;
+			}
+			oneline_len += 20;
+		}
+	}
+
+exit:
+	mshell->oneline = oneline;
+	return 0;
+}
+
 
 int parser_one_block(unsigned char *oneline, int *oneline_offset, unsigned char **out)
 {

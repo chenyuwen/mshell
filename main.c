@@ -37,7 +37,7 @@ int main(int argc, unsigned char **argv, unsigned char **envp)
 			fflush(stdout);
 		}
 
-		mshell_read_oneline(&mshell);
+		mshell.read_oneline(&mshell);
 
 		mshell_parser_oneline(&mshell, &command);
 
